@@ -32,7 +32,7 @@ jobs:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.PASSWORD }}
-          source: "deploy/docker-compose.yml,deploy/.env"
+          source: "deploy/docker-compose.yml"
           target: "task_manager_app"
           strip_components: 1
       - name: deploy app
@@ -43,4 +43,5 @@ jobs:
           password: ${{ secrets.PASSWORD }}
           script: |
             cd task_manager_app
-            echo ${{ secrets.PASSWORD }} | sudo -S docker compose up -d
+            echo ${{ secrets.PASSWORD }} | sudo -S docker-compose down
+            echo ${{ secrets.PASSWORD }} | sudo -S docker-compose up -d
