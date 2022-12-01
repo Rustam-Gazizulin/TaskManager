@@ -35,3 +35,12 @@ jobs:
           source: "deploy/docker-compose.yml"
           target: "task_manager_app"
           strip_components: 1
+      - name: deploy app
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          password: ${{ secrets.PASSWORD }}
+          script: |
+            cd task_manager_app
+            echo ${{ secrets.PASSWORD }} | sudo -S docker-compose up -d
