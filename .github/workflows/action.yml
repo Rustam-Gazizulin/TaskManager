@@ -1,0 +1,10 @@
+name: Build and deploy workflow
+on: [push]
+jobs:
+  build_and_push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: clone code
+        uses: actions/checkout@v2
+      - name: docker build
+        run: docker build -t rgazizulin/todolist_app:$GITHUB_REF_NAME-$GITHUB_RUN_ID .
