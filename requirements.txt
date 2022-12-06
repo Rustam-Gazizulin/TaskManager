@@ -5,3 +5,4 @@ psycopg2-binary==2.9.5
 sqlparse==0.4.3
 djangorestframework==3.14.0
 django-cors-headers==3.13.0
+social-auth-app-django==5.0.0
