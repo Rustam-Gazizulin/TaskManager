@@ -33,8 +33,6 @@ class GoalCategoryListView(ListAPIView):
             user=self.request.user, is_deleted=False
         )
 
-
-
 class GoalCategoryView(RetrieveUpdateDestroyAPIView):
     model = GoalCategory
     serializer_class = GoalCategorySerializer
@@ -65,9 +63,9 @@ class GoalListView(ListAPIView):
         filters.SearchFilter,
     ]
     filterset_class = GoalDateFilter
-    ordering_fields = ["title", "created"]
-    ordering = ["title"]
-    search_fields = ["title"]
+    ordering_fields = ['title', 'created']
+    ordering = ['title']
+    search_fields = ['title']
 
     def get_queryset(self):
         return Goal.objects.filter(user=self.request.user).exclude(Goal.Status.archived)
@@ -101,7 +99,7 @@ class GoalCommentListView(ListAPIView):
         filters.OrderingFilter,
         filters.SearchFilter,
     ]
-    filterset_class = GoalDateFilter
+
     ordering_fields = ["goal"]
     ordering = ["-created"]
 

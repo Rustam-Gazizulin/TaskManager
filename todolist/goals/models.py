@@ -16,9 +16,9 @@ class GoalCategory(models.Model):
     updated = models.DateTimeField(verbose_name="Дата последнего обновления")
 
     def save(self, *args, **kwargs):
-        if not self.id:  # Когда объект только создается, у него еще нет id
-            self.created = timezone.now()  # проставляем дату создания
-        self.updated = timezone.now()  # проставляем дату обновления
+        if not self.id:
+            self.created = timezone.now()
+        self.updated = timezone.now()
         return super().save(*args, **kwargs)
 
 
@@ -71,6 +71,7 @@ class Goal(models.Model):
         return super().save(*args, **kwargs)
 
 class GoalComment(models.Model):
+
     class Meta:
         verbose_name = 'Комментарий'
         verbose_name_plural = 'Комментарии'

@@ -9,8 +9,9 @@ class GoalCategoryCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = GoalCategory
-        read_only_fields = ("id", "created", "updated", "user")
-        fields = "__all__"
+        fields = '__all__'
+        read_only_fields = ('id', 'created', 'updated', 'user')
+
 
 
 class GoalCategorySerializer(serializers.ModelSerializer):
@@ -18,8 +19,8 @@ class GoalCategorySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = GoalCategory
-        fields = "__all__"
-        read_only_fields = ("id", "created", "updated", "user")
+        fields = '__all__'
+        read_only_fields = ('id', 'created', 'updated', 'user')
 
 
 class GoalCreateSerializer(serializers.ModelSerializer):
@@ -27,8 +28,9 @@ class GoalCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Goal
-        read_only_fields = ("id", "created", "updated", "user")
-        fields = "__all__"
+        fields = '__all__'
+        read_only_fields = ('id', 'created', 'updated', 'user')
+
 
     def validate_category(self, value):
         if value.is_deleted:
@@ -44,8 +46,9 @@ class GoalSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Goal
-        read_only_fields = ("id", "created", "updated", "user")
-        fields = "__all__"
+        fields = '__all__'
+        read_only_fields = ('id', 'created', 'updated', 'user')
+
 
     def validate_category(self, value):
         if value.user != self.context["request"].user:
@@ -58,8 +61,9 @@ class GoalCommentCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = GoalComment
-        read_only_fields = ("id", "created", "updated", "user")
-        fields = "__all__"
+        fields = '__all__'
+        read_only_fields = ('id', 'created', 'updated', 'user')
+
 
 
 class GoalCommentSerializer(serializers.ModelSerializer):
@@ -67,6 +71,7 @@ class GoalCommentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = GoalComment
-        read_only_fields = ("id", "created", "updated", "user")
-        fields = "__all__"
+        fields = '__all__'
+        read_only_fields = ('id', 'created', 'updated', 'user')
+
 

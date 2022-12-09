@@ -1,4 +1,3 @@
-import django_filters
 from django.db import models
 
 import django_filters
