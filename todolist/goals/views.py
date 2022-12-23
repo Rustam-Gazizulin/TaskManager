@@ -157,4 +157,3 @@ class BoardListView(ListAPIView):
 
     def get_queryset(self):
         return Board.objects.filter(participants__user=self.request.user, is_deleted=False)
-
