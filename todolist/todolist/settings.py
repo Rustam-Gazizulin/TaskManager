@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     #  user defined apps
     'core',
     'goals',
+    'bot',
 
     #  third-party apps
     'rest_framework',
