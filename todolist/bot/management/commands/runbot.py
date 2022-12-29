@@ -105,10 +105,18 @@ class Command(BaseCommand):
                 text=f'Подтвердите свой аккаунт!'
                     f'Для подтверждения необходимо ввести код: {tg_user.verification_code} на сайте'
             )
+            return None
+
+        elif not tg_user.user:
+            self.tg_client.send_message(
+                chat_id=msg.chat.id,
+                text=f'Подтвердите свой аккаунт'
+            )
+            return None
+
         if msg.text == '/goals':
             self.get_goals(msg, tg_user)
         elif msg.text == '/create':
-            #self.offset += 1
             self.choose_category(msg, tg_user)
         else:
             self.tg_client.send_message(
