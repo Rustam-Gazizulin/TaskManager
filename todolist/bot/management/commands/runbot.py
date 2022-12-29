@@ -1,3 +1,5 @@
+import datetime
+
 from django.core.management.base import BaseCommand
 
 from bot.models import TgUser
@@ -6,10 +8,17 @@ from bot.tg.dc import Message
 from goals.models import Goal, GoalCategory
 
 
+
 class Command(BaseCommand):
     help = 'Runs telegram bot'
-    tg_client = TgClient("5713673670:AAGlsWfGCfrVj-DEM4AJjxYFJJQJib1iAAc")
-    offset = 0
+    # tg_client = TgClient("5713673670:AAGlsWfGCfrVj-DEM4AJjxYFJJQJib1iAAc")
+
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.tg_client = TgClient("5713673670:AAGlsWfGCfrVj-DEM4AJjxYFJJQJib1iAAc")
+        self.offset = 0
+
 
     def choose_category(self, msg: Message, tg_user: TgUser):
         goal_categories = GoalCategory.objects.filter(
@@ -21,27 +30,29 @@ class Command(BaseCommand):
             chat_id=msg.chat.id,
             text=f'Выберите категорию:\n {goal_categories_str}')
 
-        is_running =True
-
+        is_running = True
+        run = 0
         while is_running:
+            run += 1
+            print(f'счетчик choose categ {run}')
             res = self.tg_client.get_updates(offset=self.offset)
             for item in res.result:
                 self.offset = item.update_id + 1
                 if hasattr(item, 'message'):
-                    category = goal_categories.filter(title=msg.text)
+                    category = goal_categories.filter(title=item.message.text).first()
                     if category:
-                        self.create_goal(msg, tg_user, category)
+                        self.create_goal(item.message, tg_user, category)
                         is_running = False
-                    elif msg.text == '/cancel':
+                    elif item.message.text == '/cancel':
                         self.tg_client.send_message(
-                            chat_id=msg.chat.id,
+                            chat_id=item.message.chat.id,
                             text=f'Операция отменена')
                         is_running = False
                     else:
                         self.tg_client.send_message(
-                            chat_id=msg.chat.id,
-                            text=f'Категории с названием: {msg.text} не существует')
-                        is_running = False
+                            chat_id=item.message.chat.id,
+                            text=f'Категории с названием: {item.message.text} не существует')
+
 
     def create_goal(self, msg: Message, tg_user: TgUser, category: GoalCategory):
 
@@ -54,9 +65,9 @@ class Command(BaseCommand):
             res = self.tg_client.get_updates(offset=self.offset)
             for item in res.result:
                 self.offset = item.update_id + 1
-                if item.message == '/cancel':
+                if item.message.text == '/cancel':
                     self.tg_client.send_message(
-                        chat_id=msg.chat.id,
+                        chat_id=item.message.chat.id,
                         text=f'Операция отменена')
                     is_running = False
                 else:
@@ -64,9 +75,11 @@ class Command(BaseCommand):
                         category=category,
                         user=tg_user.user,
                         title=item.message.text,
+                        due_date=datetime.date.today() + datetime.timedelta(days=14),
+                        description='for telegram',
                     )
                     self.tg_client.send_message(
-                        chat_id=msg.chat.id,
+                        chat_id=item.message.chat.id,
                         text=f'Цель {goal.title} created')
                     is_running = False
 
@@ -79,6 +92,7 @@ class Command(BaseCommand):
             chat_id=msg.chat.id,
             text=f'Вот список ваших целей:\n {goals_str}'
         )
+
 
     def handle_message(self, msg: Message):
         tg_user, created = TgUser.objects.get_or_create(
@@ -94,7 +108,7 @@ class Command(BaseCommand):
         if msg.text == '/goals':
             self.get_goals(msg, tg_user)
         elif msg.text == '/create':
-            self.offset += 1
+            #self.offset += 1
             self.choose_category(msg, tg_user)
         else:
             self.tg_client.send_message(
