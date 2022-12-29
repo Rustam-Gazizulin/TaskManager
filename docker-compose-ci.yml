@@ -48,8 +48,8 @@ services:
   bot:
     image: rgazizulin/todolist_app:$GITHUB_REF_NAME-$GITHUB_RUN_ID
     restart: always
-    env_file:
-      - .env
+    environment:
+      TG_BOT_API_TOKEN: ${TG_BOT_API_TOKEN}
     command: >
       sh -c "python3 manage.py runbot"
     depends_on:
