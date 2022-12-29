@@ -46,9 +46,7 @@ services:
       sh -c "python3 manage.py migrate"
 
   bot:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: rgazizulin/todolist_app:$GITHUB_REF_NAME-$GITHUB_RUN_ID
     restart: always
     env_file:
       - .env
