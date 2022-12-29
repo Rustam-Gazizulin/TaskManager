@@ -1,4 +1,5 @@
 import datetime
+import os
 
 from django.core.management.base import BaseCommand
 
@@ -11,12 +12,10 @@ from goals.models import Goal, GoalCategory
 
 class Command(BaseCommand):
     help = 'Runs telegram bot'
-    # tg_client = TgClient("5713673670:AAGlsWfGCfrVj-DEM4AJjxYFJJQJib1iAAc")
-
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.tg_client = TgClient("5713673670:AAGlsWfGCfrVj-DEM4AJjxYFJJQJib1iAAc")
+        self.tg_client = TgClient(os.environ.get('TG_BOT_API_TOKEN'))
         self.offset = 0
 
 
