@@ -49,6 +49,14 @@ services:
     image: rgazizulin/todolist_app:$GITHUB_REF_NAME-$GITHUB_RUN_ID
     restart: always
     environment:
+      DEBUG: ${DEBUG}
+      POSTGRES_HOST: ${POSTGRES_HOST}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      SECRET_KEY: ${SECRET_KEY}
+      SOCIAL_AUTH_VK_OAUTH2_KEY: ${SOCIAL_AUTH_VK_OAUTH2_KEY}
+      SOCIAL_AUTH_VK_OAUTH2_SECRET: ${SOCIAL_AUTH_VK_OAUTH2_SECRET}
       TG_BOT_API_TOKEN: ${TG_BOT_API_TOKEN}
     command: >
       sh -c "python3 manage.py runbot"
