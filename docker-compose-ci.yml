@@ -26,6 +26,8 @@ services:
         condition: service_healthy
       migrations:
         condition: service_completed_successfully
+      volumes:
+        - ./.env:/app/.env
     ports:
       - "8000:8000"
   migrations:
@@ -42,6 +44,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      volumes:
+        - ./.env:/app/.env
     command: >
       sh -c "python3 manage.py migrate"
 
@@ -63,6 +67,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      volumes:
+        - ./.env:/app/.env
       migrations:
         condition: service_completed_successfully
 
