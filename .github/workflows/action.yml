@@ -33,14 +33,13 @@ jobs:
         run: |
           mkdir deploy
           cat docker-compose-ci.yml | envsubst > deploy/docker-compose.yml
-          cat .docker_ci_env | envsubst > deploy/.env
       - name: copy files to server
         uses: appleboy/scp-action@master
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.PASSWORD }}
-          source: "deploy/docker-compose.yml, deploy/.env"
+          source: "deploy/docker-compose.yml"
           target: "task_manager_app"
           strip_components: 1
       - name: deploy app
