@@ -30,10 +30,8 @@ class Command(BaseCommand):
             text=f'Выберите категорию:\n {goal_categories_str}')
 
         is_running = True
-        run = 0
+
         while is_running:
-            run += 1
-            print(f'счетчик choose categ {run}')
             res = self.tg_client.get_updates(offset=self.offset)
             for item in res.result:
                 self.offset = item.update_id + 1
