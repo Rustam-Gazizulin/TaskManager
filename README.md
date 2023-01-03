@@ -1,4 +1,4 @@
-# TODOLIST
+# TaskManager
 
 ## Stack
 
@@ -11,7 +11,7 @@
 ### Clone the repo
 
 ```sh
-git clone https://github.com/Specially4/todolist.git
+git clone https://github.com/Rustam-Gazizulin/TaskManager.git
 ```
 
 ### Install dependencies
