@@ -21,6 +21,8 @@ services:
       SECRET_KEY: ${SECRET_KEY}
       SOCIAL_AUTH_VK_OAUTH2_KEY: ${SOCIAL_AUTH_VK_OAUTH2_KEY}
       SOCIAL_AUTH_VK_OAUTH2_SECRET: ${SOCIAL_AUTH_VK_OAUTH2_SECRET}
+      TG_BOT_API_TOKEN: ${TG_BOT_API_TOKEN}
+
     depends_on:
       db:
         condition: service_healthy
