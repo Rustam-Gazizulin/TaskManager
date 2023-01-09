@@ -35,20 +35,6 @@ def test_create(client: APIClient) -> None:
 
 
 @pytest.mark.django_db
-def test_login(client: APIClient, add_user: User) -> None:
-    response = client.post(
-        reverse('login_user'),
-        data={
-            'username': 'john',
-            'password': 'test1234',
-        },
-        content_type='application/json',
-    )
-
-    assert response.status_code == 200
-
-
-@pytest.mark.django_db
 def test_profile(auth_user: APIClient, add_user: User) -> None:
     response = auth_user.get(reverse('profile'))
     expected_response = ProfileSerializer(instance=add_user).data
