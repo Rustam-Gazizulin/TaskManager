@@ -10,15 +10,9 @@ class Board(models.Model):
 
     title = models.CharField(verbose_name="Название", max_length=255)
     is_deleted = models.BooleanField(verbose_name="Удалена", default=False)
-    created = models.DateTimeField(verbose_name='Дата создания')
-    updated = models.DateTimeField(verbose_name='Дата последнего обновления')
+    created = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
+    updated = models.DateTimeField(auto_now_add=True, verbose_name='Дата последнего обновления')
     
-    def save(self, *args, **kwargs):
-        if not self.id:
-            self.created = timezone.now()
-        self.updated = timezone.now()
-        return super().save(*args, **kwargs)
-
 
 class GoalCategory(models.Model):
     class Meta:
@@ -31,14 +25,8 @@ class GoalCategory(models.Model):
     title = models.CharField(verbose_name="Название", max_length=255)
     user = models.ForeignKey(User, verbose_name="Автор", on_delete=models.PROTECT)
     is_deleted = models.BooleanField(verbose_name="Удалена", default=False)
-    created = models.DateTimeField(verbose_name="Дата создания")
-    updated = models.DateTimeField(verbose_name="Дата последнего обновления")
-
-    def save(self, *args, **kwargs):
-        if not self.id:
-            self.created = timezone.now()
-        self.updated = timezone.now()
-        return super().save(*args, **kwargs)
+    created = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
+    updated = models.DateTimeField(auto_now_add=True, verbose_name="Дата последнего обновления")
 
 
 class Goal(models.Model):
@@ -56,7 +44,7 @@ class Goal(models.Model):
         critical = 4, "Критический"
 
     title = models.CharField(verbose_name='Назавание', max_length=255)
-    description = models.TextField(verbose_name='Описание')
+    description = models.TextField(verbose_name='Описание', null=True, blank=True)
     status = models.PositiveSmallIntegerField(
         verbose_name="Статус",
         choices=Status.choices,
@@ -68,7 +56,7 @@ class Goal(models.Model):
         default=Priority.medium
     )
 
-    due_date = models.DateField(verbose_name='Дата выполнения')
+    due_date = models.DateField(verbose_name='Дата выполнения', null=True, blank=True)
     user = models.ForeignKey(
         'core.User',
         verbose_name='Автор',
@@ -80,14 +68,9 @@ class Goal(models.Model):
         related_name='goals',
         on_delete=models.CASCADE
     )
-    created = models.DateTimeField(verbose_name="Дата создания")
-    updated = models.DateTimeField(verbose_name="Дата последнего обновления")
+    created = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
+    updated = models.DateTimeField(auto_now_add=True, verbose_name="Дата последнего обновления")
     
-    def save(self, *args, **kwargs):
-        if not self.id:
-            self.created = timezone.now()
-        self.updated = timezone.now()
-        return super().save(*args, **kwargs)
 
 class GoalComment(models.Model):
 
@@ -108,15 +91,8 @@ class GoalComment(models.Model):
         on_delete=models.PROTECT,
         related_name='comments',
     )
-    created = models.DateTimeField(verbose_name='Дата создания')
-    updated = models.DateTimeField(verbose_name='Дата последнего обновления')
-    
-    def save(self, *args, **kwargs):
-        if not self.id:
-            self.created = timezone.now()
-        self.updated = timezone.now()
-        return super().save(*args, **kwargs)
-
+    created = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
+    updated = models.DateTimeField(auto_now_add=True, verbose_name='Дата последнего обновления')
 
 class BoardParticipant(models.Model):
     class Meta:
@@ -144,3 +120,5 @@ class BoardParticipant(models.Model):
     role = models.PositiveSmallIntegerField(
         verbose_name="Роль", choices=Role.choices, default=Role.owner
     )
+    created = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
+    updated = models.DateTimeField(auto_now=True, verbose_name="Дата последнего обновления")

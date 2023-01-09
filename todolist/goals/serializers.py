@@ -1,11 +1,9 @@
-from django.contrib.auth import get_user_model
 from django.db import transaction
 from rest_framework import serializers
 
-from core.serializers import ProfileSerializer
+from core.models import User
+from core.serializers import UserSerializer
 from goals.models import GoalCategory, Goal, GoalComment, Board, BoardParticipant
-
-USER_MODEL = get_user_model()
 
 
 class GoalCategoryCreateSerializer(serializers.ModelSerializer):
@@ -13,77 +11,99 @@ class GoalCategoryCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = GoalCategory
-        fields = '__all__'
-        read_only_fields = ('id', 'created', 'updated', 'user')
+        read_only_fields = ("id", "created", "updated", "user")
+        fields = "__all__"
 
+    def validate_board(self, value: Board):
+        if value.is_deleted:
+            raise serializers.ValidationError("Нет прав для этой операции")
+        if not BoardParticipant.objects.filter(
+            board=value,
+            role__in=[BoardParticipant.Role.owner, BoardParticipant.Role.writer],
+            user=self.context["request"].user
+        ).exists():
+            raise serializers.ValidationError("Вы должны быть Владельцем или Редактором")
+
+        return value
 
 
 class GoalCategorySerializer(serializers.ModelSerializer):
-    user = ProfileSerializer(read_only=True)
+    user = UserSerializer(read_only=True)
 
     class Meta:
         model = GoalCategory
-        fields = '__all__'
-        read_only_fields = ('id', 'created', 'updated', 'user', 'board')
+        fields = "__all__"
+        read_only_fields = ("id", "created", "updated", "user", "board")
 
 
 class GoalCreateSerializer(serializers.ModelSerializer):
+    category = serializers.PrimaryKeyRelatedField(
+        queryset=GoalCategory.objects.filter(is_deleted=False)
+    )
     user = serializers.HiddenField(default=serializers.CurrentUserDefault())
 
-    class Meta:
-        model = Goal
-        fields = '__all__'
-        read_only_fields = ('id', 'created', 'updated', 'user')
-
-
-    def validate_category(self, value):
+    def validate_category(self, value: GoalCategory):
         if value.is_deleted:
-            raise serializers.ValidationError("not allowed in deleted category")
+            raise serializers.ValidationError("запрещено в удаленной категории")
 
         if value.user != self.context["request"].user:
             raise serializers.ValidationError("not owner of category")
 
+        if not BoardParticipant.objects.filter(
+            board_id=value.board_id,
+            role__in=[BoardParticipant.Role.owner, BoardParticipant.Role.writer],
+            user=self.context["request"].user,
+        ).exists():
+            raise serializers.ValidationError("Transfer between projects not allowed")
+
         return value
-        
-class GoalSerializer(serializers.ModelSerializer):
-    user = ProfileSerializer(read_only=True)
 
     class Meta:
         model = Goal
-        fields = '__all__'
-        read_only_fields = ('id', 'created', 'updated', 'user')
+        read_only_fields = ("id", "created", "updated", "user")
+        fields = "__all__"
 
+
+class GoalSerializer(serializers.ModelSerializer):
+    user = UserSerializer(read_only=True)
+
+    class Meta:
+        model = Goal
+        read_only_fields = ("id", "created", "updated", "user")
+        fields = "__all__"
 
     def validate_category(self, value):
+
         if value.user != self.context["request"].user:
             raise serializers.ValidationError("not owner of category")
 
         return value
+
 
 class GoalCommentCreateSerializer(serializers.ModelSerializer):
     user = serializers.HiddenField(default=serializers.CurrentUserDefault())
 
     class Meta:
         model = GoalComment
-        fields = '__all__'
-        read_only_fields = ('id', 'created', 'updated', 'user')
-
+        read_only_fields = ("id", "created", "updated", "user")
+        fields = "__all__"
 
 
 class GoalCommentSerializer(serializers.ModelSerializer):
-    user = ProfileSerializer(read_only=True)
+    user = UserSerializer(read_only=True)
 
     class Meta:
         model = GoalComment
-        fields = '__all__'
-        read_only_fields = ('id', 'created', 'updated', 'user')
+        read_only_fields = ("id", "created", "updated", "user")
+        fields = "__all__"
+
 
 class BoardCreateSerializer(serializers.ModelSerializer):
     user = serializers.HiddenField(default=serializers.CurrentUserDefault())
 
     class Meta:
         model = Board
-        read_only_fields = ("id", "created", "updated")
+        read_only_fields = ("id", "is_deleted", "created", "updated")
         fields = "__all__"
 
     def create(self, validated_data):
@@ -94,13 +114,10 @@ class BoardCreateSerializer(serializers.ModelSerializer):
         )
         return board
 
+
 class BoardParticipantSerializer(serializers.ModelSerializer):
-    role = serializers.ChoiceField(
-        required=True, choices=BoardParticipant.Role.choices
-    )
-    user = serializers.SlugRelatedField(
-        slug_field="username", queryset=USER_MODEL.objects.all()
-    )
+    role = serializers.ChoiceField(required=True, choices=BoardParticipant.Role.choices[1:])
+    user = serializers.SlugRelatedField(slug_field="username", queryset=User.objects.all())
 
     class Meta:
         model = BoardParticipant
@@ -128,28 +145,22 @@ class BoardSerializer(serializers.ModelSerializer):
                 if old_participant.user_id not in new_by_id:
                     old_participant.delete()
                 else:
-                    if (
-                            old_participant.role
-                            != new_by_id[old_participant.user_id]["role"]
-                    ):
-                        old_participant.role = new_by_id[old_participant.user_id][
-                            "role"
-                        ]
+                    if old_participant.role != new_by_id[old_participant.user_id]["role"]:
+                        old_participant.role = new_by_id[old_participant.user_id]["role"]
                         old_participant.save()
                     new_by_id.pop(old_participant.user_id)
             for new_part in new_by_id.values():
                 BoardParticipant.objects.create(
                     board=instance, user=new_part["user"], role=new_part["role"]
                 )
-
-            instance.title = validated_data["title"]
-            instance.save()
+            if title := validated_data.get("title"):
+                instance.title = title
+                instance.save()
 
         return instance
+
 
 class BoardListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Board
         fields = "__all__"
-
-

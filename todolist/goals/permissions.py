@@ -1,67 +1,37 @@
 from rest_framework import permissions
+from rest_framework.permissions import IsAuthenticated
 
-from goals.models import BoardParticipant
-
-
-class BoardPermissions(permissions.BasePermission):
-    def has_object_permission(self, request, view, obj):
-        if not request.user.is_authenticated:
-            return False
-        if request.method in permissions.SAFE_METHODS:
-            return BoardParticipant.objects.filter(
-                user=request.user, board=obj
-            ).exists()
-        return BoardParticipant.objects.filter(
-            user=request.user, board=obj, role=BoardParticipant.Role.owner
-        ).exists()
+from goals.models import BoardParticipant, Goal, GoalCategory, Board, GoalComment
 
 
-class GoalCategoryPermissions(permissions.BasePermission):
-    def has_object_permission(self, request, view, category):
-        if not request.user.is_authenticated:
-            return False
-        if request.method in permissions.SAFE_METHODS:
-            return BoardParticipant.objects.filter(user=request.user, board=category.board).exists()
-        return BoardParticipant.objects.filter(
-            user=request.user,
-            board=category.board,
-            role__in=[
-                BoardParticipant.Role.owner,
-                BoardParticipant.Role.writer,
-            ]
-        ).exists()
+class BoardPermissions(IsAuthenticated):
+    def has_object_permission(self, request, view, obj: Board):
+        filters: dict = {'user': request.user, 'board': obj}
+        if request.method not in permissions.SAFE_METHODS:
+            filters['role'] = BoardParticipant.Role.owner
+        return BoardParticipant.objects.filter(**filters).exists()
 
 
-class GoalPermissions(permissions.BasePermission):
-    def has_object_permission(self, request, view, goal):
-        if not request.user.is_authenticated:
-            return False
-        if request.method in permissions.SAFE_METHODS:
-            return BoardParticipant.objects.filter(user=request.user, board=goal.category.board).exists()
-        return BoardParticipant.objects.filter(
-            user=request.user,
-            board=goal.category.board,
-            role__in=[
-                BoardParticipant.Role.owner,
-                BoardParticipant.Role.writer,
-            ]
-        ).exists()
-    
-class CommentPermissions(permissions.BasePermission):
-    def has_object_permission(self, request, view, comment):
-        if not request.user.is_authenticated:
-            return False
-        if request.method in permissions.SAFE_METHODS:
-            return True
-        if request.method == 'POST':
-            return BoardParticipant.objects.filter(
-                user=request.user,
-                board=comment.goal.category.board,
-                role__in=[
-                    BoardParticipant.Role.owner,
-                    BoardParticipant.Role.writer,
-                ]
-            ).exists()
-        if request.method in ['PUT', 'PATCH', 'DELETE']:
-            return comment.user == request.user
+class GoalCategoryPermissions(IsAuthenticated):
+    def has_object_permission(self, request, view, obj: GoalCategory):
+        filters: dict = {'user': request.user, 'board': obj.board}
+        if request.method not in permissions.SAFE_METHODS:
+            filters['role__in'] = [BoardParticipant.Role.owner, BoardParticipant.Role.writer]
+        return BoardParticipant.objects.filter(**filters).exists()
+
+
+class GoalPermissions(IsAuthenticated):
+    def has_object_permission(self, request, view, obj: Goal):
+        filters: dict = {'user': request.user, 'board': obj.category.board}
+        if request.method not in permissions.SAFE_METHODS:
+            filters['role__in'] = [BoardParticipant.Role.owner, BoardParticipant.Role.writer]
+        return BoardParticipant.objects.filter(**filters).exists()
+
+
+class CommentsPermissions(IsAuthenticated):
+    def has_object_permission(self, request, view, obj: GoalComment):
+        return any((
+            request.method in permissions.SAFE_METHODS,
+            obj.user_id == request.user.id,
+        ))
 
